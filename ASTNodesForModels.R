@@ -1,7 +1,7 @@
 # These functions determine AST node types in a list of models
 
 library(libsbmlwrapper)
-source("./BiomodelsAnalysis/ASTNodes.R")
+source("./BioModels-Analysis/ASTNodes.R")
 
 # get all AST nodes types in a list of models
 get_AST_from_list = function(lmod, removeModelDuplicates) {
