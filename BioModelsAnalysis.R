@@ -1,6 +1,11 @@
-# Note: Curated models can be saved as an R-list via get_all_models(),
+# Scripts used in an analysis of the BioModels database
+# Models obtained from the EBI FTP server ftp://ftp.ebi.ac.uk/pub/databases/biomodels/
+# and stored in local directory 'BioModels'
+# Note: Curated models were saved as an R-list via get_all_models(),
 # but this was not possible with non-curated models. (the '_noncur'
 # functions extract only the required information required from each model).
+
+
 
 # Function get_all_models():
 # Reads a file containing SBML models from the curated section of the
@@ -375,169 +380,6 @@ get_unitDefinition_components = function(mod) {
 
 
 # ==================================================================
-# Connections (Species)
-# ==================================================================
-
-# Function get_species_resources_cur(lmod):
-# Gets the URIs for all species in all curated models
-# N.B. only URIs for which the biological qualifier is 
-# BQB_IS or BQB_IS_VERSION_OF are included
-# Argument 'lmod' is list of curated models from the BioModels database
-# Returns a vector of species URIs
-# Vector elements are named with the id of the model
-# in which the URIs exist
-get_species_resources_cur = function(lmod) {
-  
-  num = length(lmod)
-  v = vector(mode = "character")
-  
-  for(i in 1:num) {
-    v = append(v, get_model_species_resources(lmod[[i]]))
-  }
-  
-  return(v)  
-}
-
-
-# returns a vector containing species URIs for a model (duplicates 
-# within a model are disregarded)
-# The model id is used to name the elements of the vector 
-get_model_species_resources = function(mod) {
-  
-  v = vector(mode = "character")
-  
-  numSpecies = Model_getNumSpecies(mod)
-  if(numSpecies > 0) {
-    for(i in 1:numSpecies) {
-      v = append(v, get_species_resources(mod[[6]][[i]]))    
-    }    
-  }  
-  # disregard duplicates within a model
-  v = unique(v)
-  
-  # name elements and return
-  if(length(v)>0) {
-    names(v)[1:length(v)] = Model_getId(mod)
-  }
-  return(v)  
-}
-
-# returns a vector containing all URIs for a species for which
-# the biological qualifier is BQB_IS or BQB_IS_VERSION_OF
-get_species_resources = function(sp) {
-  
-  v = vector(mode = "character")
-  
-  nCVT = SBase_getNumCVTerms(sp)
-  
-  if(nCVT > 0) {    
-    
-    for(i in 1:nCVT) {
-      
-      cvt = SBase_getCVTerm(sp,i-1)
-      
-      if(CVTerm_hasRequiredAttributes(cvt)){
-        
-        bqType = CVTerm_getBiologicalQualifierType(cvt)
-        
-        # only add to vector if qualifier is BQB_IS or BQB_IS_VERSION_OF
-        if(bqType %in% c("BQB_IS", "BQB_IS_VERSION_OF")) {
-          nRes = CVTerm_getNumResources(cvt)
-          for(j in 1:nRes) {
-            v = append(v, CVTerm_getResourceURI(cvt,j-1))
-          }          
-        }             
-      }
-    }    
-  }  
-  return(v)
-}
-
-
-# ==================================================================
-# Connections (Reactions)
-# ==================================================================
-
-# Function get_reaction_resources_cur(lmod):
-# Gets the URIs for all reactions in all curated models
-# N.B. only URIs for which the biologival qualifier is 
-# BQB_IS or BQB_IS_VERSION_OF are included
-# Argument 'lmod' is list of curated models from the BioModels database
-# Returns a vector of species URIs
-# Vector elements are named with the id of the model
-# in which the URIs exist
-get_reaction_resources_cur = function(lmod) {
-  
-  num = length(lmod)
-  v = vector(mode = "character")
-  
-  for(i in 1:num) {    
-    v = append(v, get_model_reaction_resources(lmod[[i]]))
-  }
-  
-  return(v)
-}
-
-
-
-# returns a vector containing resource URIs for a model (duplicates 
-# within a model are disregarded)
-# The model id is used to name the elements of the vector 
-get_model_reaction_resources = function(mod) {
-  
-  v = vector(mode = "character")
-  
-  numReactions = Model_getNumReactions(mod)
-  if(numReactions > 0) {
-    for(i in 1:numReactions) {
-      v = append(v, get_reaction_resources(mod[[11]][[i]]))    
-    }    
-  }  
-  # disregard duplicates within a model
-  v = unique(v)
-  
-  # name elements and return
-  if(length(v)>0) {
-    names(v)[1:length(v)] = Model_getId(mod)
-  }
-  return(v)  
-}
-
-
-
-# returns a vector containing all URIs for a reaction for which
-# the biological qualifier is BQB_IS or BQB_IS_VERSION_OF
-get_reaction_resources = function(r) {
-  
-  v = vector(mode = "character")
-  
-  nCVT = SBase_getNumCVTerms(r)
-  
-  if(nCVT > 0) {    
-    
-    for(i in 1:nCVT) {
-      
-      cvt = SBase_getCVTerm(r,i-1)
-      
-      if(CVTerm_hasRequiredAttributes(cvt)){
-        
-        bqType = CVTerm_getBiologicalQualifierType(cvt)
-        
-        # only add to vector if qualifier is BQB_IS or BQB_IS_VERSION_OF
-        if(bqType %in% c("BQB_IS", "BQB_IS_VERSION_OF")) {
-          nRes = CVTerm_getNumResources(cvt)
-          for(j in 1:nRes) {
-            v = append(v, CVTerm_getResourceURI(cvt,j-1))
-          }          
-        }             
-      }
-    }    
-  }  
-  return(v)
-}
-  
-
-# ==================================================================
 # Connections (URIs occurring in more than one model)
 # ==================================================================
 
@@ -566,9 +408,6 @@ get_component_resources_cur = function(lmod, compStr) {
   v = vector(mode = "character")
   
   for(i in 1:num) {
-    
-    cat("\nAt model:", i)
-    
     v = append(v, get_model_component_resources(lmod[[i]], compStr))
   }
   
@@ -576,7 +415,7 @@ get_component_resources_cur = function(lmod, compStr) {
 }
 
 
-# returns a vector containing species URIs for a model (duplicates 
+# returns a vector containing URIs for all instances of a component within a single model (duplicates 
 # within a model are disregarded)
 # The model id is used to name the elements of the vector 
 get_model_component_resources = function(mod, compStr) {
@@ -599,7 +438,7 @@ get_model_component_resources = function(mod, compStr) {
   return(v)  
 }
 
-# returns a vector containing all URIs for a species for which
+# returns a vector containing all URIs for an instance of a component for which
 # the biological qualifier is BQB_IS or BQB_IS_VERSION_OF
 get_component_resources = function(obj) {
   
